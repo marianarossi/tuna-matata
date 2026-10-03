@@ -1,0 +1,15 @@
+rules_version = '2';
+
+// Só a conta compartilhada do Tuna Matata lê e grava.
+// Quem abrir o link sem a senha não vê nada.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function ehNos() {
+      return request.auth != null && request.auth.uid == 'm3MXk6CYKpbwbGQLj7MHX6sIpPA3';
+    }
+
+    match /{documento=**} {
+      allow read, write: if ehNos();
+    }
+  }
+}

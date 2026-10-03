@@ -1,4 +1,6 @@
-# Tuna Matata 🐟 · Proposta técnica (para aprovação)
+# Tuna Matata 🐟 · Arquitetura
+
+Proposta técnica aprovada em 2026-10-03, já com os ajustes pedidos (região Madrid, prévia por PR, `increment()` no estoque).
 
 ## 1. Stack
 
@@ -11,7 +13,7 @@
 | Navegação | 4 abas embaixo + telas internas, roteamento simples por hash, sem biblioteca |
 | Testes | Vitest só na lógica de negócio (finalizar/reabrir, "dá pra fazer agora") |
 | Hospedagem | Firebase Hosting (Spark) |
-| Deploy | GitHub Actions: push na `main` → build → `firebase deploy` (site + regras do Firestore) |
+| Deploy | GitHub Actions: push na `main` → build → `firebase deploy` (site + regras do Firestore). Cada PR ganha um link de prévia (canal de preview do Hosting, expira em 7 dias) |
 | E-mail | EmailJS (grátis, 200 e-mails/mês), chamado direto do navegador |
 
 **Por que Svelte:** é o framework com menos código para o mesmo resultado. Um componente é praticamente HTML + um pouco de JS, a reatividade é nativa (sem hooks nem estado global complicado) e o bundle final é pequeno, o que deixa o PWA rápido no iPhone. Vite dá build e servidor local sem configuração. Não uso SvelteKit nem servidor: é um site estático.
@@ -33,6 +35,8 @@ Todas as quantidades são inteiros ≥ 0.
 }
 ```
 O estoque fica no próprio documento do ingrediente: uma coleção a menos, uma leitura a menos, e a transação de finalizar lê e grava os mesmos documentos.
+
+Os botões + e − do estoque usam `increment(1)` / `increment(-1)` do Firestore (atômico: se os dois tocarem ao mesmo tempo, as duas mudanças contam). Para nunca ficar negativo, o − fica desabilitado em 0 e as regras do Firestore recusam qualquer gravação com `estoque < 0`, então um −1 simultâneo que levaria a −1 é rejeitado pelo servidor.
 
 ### `receitas/{id}`  (id = slug do nome, ex. `massa-com-atum`)
 ```js
@@ -110,13 +114,13 @@ A lógica do passo 3 de finalizar é uma função pura (`planejar(refeicoes, rec
 
 ## 4. Fluxo de trabalho no GitHub
 
-Cada etapa vai num commit na branch `tuna-matata-app` e num Pull Request. Vocês testam, dão ok, fazem o merge na `main` e o GitHub Actions publica. Assim nada chega no site sem vocês aprovarem.
+Cada etapa vai num Pull Request. O PR ganha um link de prévia (comentário automático do GitHub Actions) para testar no iPhone. Depois do ok, o merge na `main` publica o site e as regras do Firestore.
 
-## 5. Dúvidas
+## 5. Decisões tomadas
 
-1. **Fluxo:** PR por etapa (merge = publicar) serve, ou preferem que eu faça commit direto na `main`?
-2. **Firebase:** o projeto já existe? Na etapa 1 eu passo o passo a passo e vou precisar que vocês me mandem a config web e o UID da conta compartilhada (nenhum dos dois é segredo). Sugiro o Firestore na região `southamerica-east1` (São Paulo).
-3. **Semana padrão na aba Semana:** sábado e domingo abrem a semana seguinte; de segunda a sexta abrem a semana atual, com setas para navegar. Pode ser?
-4. **Reabrir:** permito reabrir só a semana finalizada mais recente (reabrir uma semana antiga devolveria ao estoque coisas que já foram comidas). Ok?
-5. **Seed:** o script atualiza nome/emoji/unidade/básico dos ingredientes, mas não mexe no estoque de quem já existe (só ingrediente novo recebe o estoque do arquivo). E para não precisar instalar nada no computador, o seed roda por um botão manual no GitHub Actions ("Run workflow"). Ok?
-6. **Importar receitas com id repetido:** pulo e aviso (padrão), ou atualizo a receita existente?
+- Firestore em `europe-southwest1` (Madrid).
+- Aba Semana: sábado e domingo abrem a semana seguinte; de segunda a sexta, a semana atual.
+- Reabrir: só a semana finalizada mais recente.
+- Seed: botão manual no GitHub Actions; atualiza nome/emoji/unidade/básico, nunca sobrescreve o estoque de ingredientes que já existem.
+- Importar receitas: id repetido é pulado e avisado.
+- E-mail: EmailJS direto do navegador.

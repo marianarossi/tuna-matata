@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="mar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f8fd8"/>
+      <stop offset="1" stop-color="#1b4f9c"/>
+    </linearGradient>
+    <linearGradient id="atum" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5b6f8f"/>
+      <stop offset="0.5" stop-color="#9fb3cc"/>
+      <stop offset="0.52" stop-color="#e9eef5"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#mar)"/>
+  <circle cx="400" cy="120" r="16" fill="#ffffff" opacity=".35"/>
+  <circle cx="436" cy="168" r="10" fill="#ffffff" opacity=".3"/>
+  <circle cx="380" cy="80" r="8" fill="#ffffff" opacity=".25"/>
+  <!-- cauda -->
+  <path d="M352 272 L452 182 Q432 272 452 362 Z" fill="#ff8a7a"/>
+  <!-- barbatanas -->
+  <path d="M200 192 Q250 120 312 186 Z" fill="#ff8a7a"/>
+  <path d="M220 344 Q262 392 300 340 Z" fill="#ff8a7a"/>
+  <!-- corpo -->
+  <ellipse cx="236" cy="272" rx="148" ry="96" fill="url(#atum)"/>
+  <!-- olho e sorriso -->
+  <circle cx="150" cy="250" r="22" fill="#ffffff"/>
+  <circle cx="144" cy="250" r="12" fill="#15233d"/>
+  <circle cx="139" cy="245" r="4" fill="#ffffff"/>
+  <path d="M104 300 Q128 318 152 300" stroke="#15233d" stroke-width="9" fill="none" stroke-linecap="round"/>
+  <!-- bochecha -->
+  <circle cx="178" cy="300" r="12" fill="#ff8a7a" opacity=".55"/>
+  <!-- pinulas do atum -->
+  <path d="M318 214 l14 -10 l2 16 Z M340 226 l14 -8 l0 15 Z" fill="#ffc94d"/>
+  <path d="M318 330 l14 10 l2 -16 Z M340 318 l14 8 l0 -15 Z" fill="#ffc94d"/>
+</svg>
