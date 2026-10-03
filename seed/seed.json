@@ -1,0 +1,24 @@
+{
+  "ingredientes": [
+    { "id": "atum", "nome": "Atum", "emoji": "🐟", "unidade": "lata", "estoque": 1 },
+    { "id": "massa", "nome": "Massa", "emoji": "🍝", "unidade": "pacote", "estoque": 2 },
+    { "id": "pimentao", "nome": "Pimentão", "emoji": "🫑", "unidade": "unidade", "estoque": 2 },
+    { "id": "cebola-roxa", "nome": "Cebola roxa", "emoji": "🧅", "unidade": "unidade", "estoque": 6 },
+    { "id": "tomate", "nome": "Tomate", "emoji": "🍅", "unidade": "unidade", "estoque": 4 },
+    { "id": "ovo", "nome": "Ovo", "emoji": "🥚", "unidade": "unidade", "estoque": 12 },
+    { "id": "arroz", "nome": "Arroz", "emoji": "🍚", "unidade": "pacote", "estoque": 1 },
+    { "id": "feijao", "nome": "Feijão", "emoji": "🫘", "unidade": "lata", "estoque": 2 },
+    { "id": "frango", "nome": "Frango", "emoji": "🍗", "unidade": "pacote", "estoque": 1 },
+    { "id": "batata", "nome": "Batata", "emoji": "🥔", "unidade": "unidade", "estoque": 5 },
+    { "id": "cenoura", "nome": "Cenoura", "emoji": "🥕", "unidade": "unidade", "estoque": 3 },
+    { "id": "queijo", "nome": "Queijo ralado", "emoji": "🧀", "unidade": "pacote", "estoque": 1 },
+    { "id": "milho", "nome": "Milho", "emoji": "🌽", "unidade": "lata", "estoque": 1 },
+    { "id": "leite-de-coco", "nome": "Leite de coco", "emoji": "🥥", "unidade": "lata", "estoque": 0 },
+    { "id": "brocolis", "nome": "Brócolis", "emoji": "🥦", "unidade": "unidade", "estoque": 1 },
+    { "id": "sal", "nome": "Sal", "emoji": "🧂", "unidade": "pacote", "basico": true },
+    { "id": "azeite", "nome": "Azeite", "emoji": "🫒", "unidade": "garrafa", "basico": true },
+    { "id": "alho", "nome": "Alho", "emoji": "🧄", "unidade": "cabeça", "basico": true },
+    { "id": "oleo", "nome": "Óleo", "emoji": "🌻", "unidade": "garrafa", "basico": true },
+    { "id": "pimenta", "nome": "Pimenta-do-reino", "emoji": "🌶️", "unidade": "pote", "basico": true }
+  ]
+}

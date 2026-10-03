@@ -32,6 +32,11 @@
   </div>
 </section>
 
+<a class="card atalho" href="#/ingredientes">
+  <span>🧂 Ingredientes</span>
+  <span class="seta">›</span>
+</a>
+
 <button class="botao perigo largo" onclick={sair}>Sair deste celular</button>
 
 <p class="rodape">🐟 Tuna Matata</p>
@@ -52,6 +57,20 @@
   }
   .linha strong {
     text-align: right;
+  }
+  .atalho {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    margin-bottom: 20px;
+    color: var(--texto);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .seta {
+    color: var(--texto-suave);
+    font-size: 1.3rem;
   }
   .rodape {
     text-align: center;

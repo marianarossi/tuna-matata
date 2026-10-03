@@ -21,15 +21,20 @@ Svelte 5 (runes: `$state`, `$derived`, `$props`) + Vite, JavaScript puro, CSS pr
 ```
 src/
   config.js            config web do Firebase e e-mail da conta compartilhada
-  lib/firebase.js      app, auth e db (cache offline)
+  lib/firebase.js      app, auth e db (cache offline; VITE_EMULADOR=1 usa os emuladores)
+  lib/dados.svelte.js  estado compartilhado sincronizado ao vivo (onSnapshot)
+  lib/aviso.svelte.js  aviso rápido (toast)
   lib/                 lógica de negócio em funções puras + testes *.test.js
   App.svelte           sessão, rotas por hash (#/estoque, #/receitas, #/semana, #/compras, #/ajustes)
   telas/               uma tela por aba + Login + Ajustes
   componentes/         peças reutilizáveis (Abas, Vazio...)
   estilo.css           variáveis de cor, .card, .botao, .chip
 public/                ícones do PWA (icone.svg, PNGs)
-firestore.rules        só o UID da conta compartilhada lê e grava
-.github/workflows/     deploy.yml (main) e preview.yml (PRs)
+firestore.rules        só o UID da conta compartilhada lê e grava; estoque inteiro ≥ 0
+testes/                testes das regras no emulador (npm run test:regras)
+seed/seed.json         dados iniciais (ingredientes; receitas na etapa 3)
+scripts/seed.mjs       carrega o seed com firebase-admin
+.github/workflows/     deploy.yml (main), preview.yml (PRs), seed.yml (manual)
 docs/                  especificação e arquitetura
 ```
 
@@ -63,12 +68,16 @@ Detalhes e exemplos em `docs/arquitetura.md`.
 ```bash
 npm install
 npm run dev      # http://localhost:5173
-npm test         # Vitest
-npm run build    # gera dist/
+npm test              # Vitest (src/)
+npm run test:regras   # firestore.rules no emulador (Java)
+npm run build         # gera dist/
 ```
+
+Testar o app inteiro no computador sem tocar no banco de verdade: rodar os emuladores (`npx firebase-tools@15 emulators:start --only auth,firestore --project tuna-matata`), criar no emulador de Auth um usuário com o UID das regras e o e-mail de `src/config.js`, carregar o seed com `FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 node scripts/seed.mjs` e abrir `VITE_EMULADOR=1 npm run dev`.
 
 - Cada PR roda `preview.yml`: testes, build e um link de prévia do Hosting comentado no PR (expira em 7 dias, usa o banco de verdade).
 - Push na `main` roda `deploy.yml`: testes, build e `firebase deploy --only hosting,firestore:rules`.
+- Seed: Actions → "Carregar seed" → Run workflow (`seed.yml`, usa o mesmo secret).
 
 ## Como trabalhamos
 
