@@ -1,0 +1,11 @@
+node_modules/
+dist/
+dev-dist/
+.firebase/
+*.log
+.DS_Store
+
+# Chaves de conta de serviço do Firebase NUNCA vão para o repositório
+*service-account*.json
+*-firebase-adminsdk-*.json
+conta-de-servico.json
