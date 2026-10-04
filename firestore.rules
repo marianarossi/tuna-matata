@@ -8,8 +8,17 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == 'm3MXk6CYKpbwbGQLj7MHX6sIpPA3';
     }
 
-    match /{documento=**} {
-      allow read, write: if ehNos();
+    // Estoque é sempre inteiro e nunca negativo. Isso vale também para o
+    // increment(-1): se os dois tirarem a última lata ao mesmo tempo, o
+    // segundo -1 é recusado aqui.
+    function estoqueValido(dados) {
+      return !('estoque' in dados) || (dados.estoque is int && dados.estoque >= 0);
+    }
+
+    match /{colecao}/{id} {
+      allow read, delete: if ehNos();
+      allow create, update: if ehNos()
+        && (colecao != 'ingredientes' || estoqueValido(request.resource.data));
     }
   }
 }

@@ -61,7 +61,24 @@ O peixinho aparece na Tela de Início como "Tuna Matata" e abre em tela cheia, s
 
 ### 7. Carregar os dados iniciais (seed)
 
-_Chega na etapa 2._
+Os ingredientes iniciais ficam em [`seed/seed.json`](seed/seed.json). O arquivo atual é só um exemplo: troquem pela lista de vocês.
+
+1. No GitHub, abram `seed/seed.json`, toquem no lápis ✏️, editem e façam **Commit changes** (pode ser direto na `main`).
+2. Vão em **Actions** → **Carregar seed** → **Run workflow** → **Run workflow**.
+3. Em menos de um minuto os ingredientes aparecem no app.
+
+Cada ingrediente tem esta forma:
+
+```json
+{ "id": "cebola-roxa", "nome": "Cebola roxa", "emoji": "🧅", "unidade": "unidade", "estoque": 6 }
+```
+
+- `id`: minúsculo, sem acento, com hífens. É o que as receitas usam, então não mudem depois.
+- `estoque`: só vale para ingrediente **novo**. Se o ingrediente já existe no app, o seed atualiza nome, emoji, unidade e básico, mas **nunca** mexe no estoque.
+- `"basico": true` para sal, azeite, alho e outros da despensa (sem estoque, fora da lista de compras).
+- Rodar o seed de novo é seguro: nada é apagado e nada é duplicado.
+
+Também dá para adicionar e editar ingredientes pelo app: ⚙️ → **Ingredientes**.
 
 ### 8. Configurar o e-mail (EmailJS)
 
@@ -75,6 +92,7 @@ _Chega na etapa 5._
 npm install
 npm run dev      # abre em http://localhost:5173
 npm test         # testes da lógica
+npm run test:regras   # testa firestore.rules no emulador (precisa de Java)
 npm run build    # gera a pasta dist/
 ```
 
