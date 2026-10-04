@@ -1,141 +1,151 @@
 # Tuna Matata 🐟
 
-Nossa solução muito séria para a pergunta "o que tem pra janta?". Estoque da despensa, receitas, cardápio da semana e lista de compras, num app que fica na Tela de Início do iPhone.
+Our very serious answer to the question "what's for dinner?".
 
-- Especificação: [`docs/especificacao.md`](docs/especificacao.md)
-- Arquitetura e modelo de dados: [`docs/arquitetura.md`](docs/arquitetura.md)
+Tuna Matata is a personal PWA for two siblings who live together. It keeps track of what is in the pantry, stores our recipes, plans the week's meals and works out the shopping list. It lives on the iPhone Home Screen, syncs between our two phones and costs nothing to run.
 
-Custo: zero. Firebase no plano gratuito (Spark), GitHub Actions para publicar.
+> The app's interface, the code identifiers and the documents under [`docs/`](docs/) are in Brazilian Portuguese. The app sits behind a shared password, so there is no public demo.
 
----
+## Screenshots
 
-## Passo a passo (primeira vez)
+<!-- Save the images in docs/screenshots/ and uncomment each line below. -->
 
-### 1. Projeto no Firebase ✅ (já feito)
+| Pantry | Recipes | Week | Shopping |
+|---|---|---|---|
+| <!-- ![Pantry](docs/screenshots/estoque.png) --> | <!-- ![Recipes](docs/screenshots/receitas.png) --> | <!-- ![Week](docs/screenshots/semana.png) --> | <!-- ![Shopping](docs/screenshots/compras.png) --> |
 
-- Projeto `tuna-matata` no [console do Firebase](https://console.firebase.google.com/), plano Spark.
-- Firestore criado em `europe-southwest1` (Madrid), modo produção.
-- Authentication → Método de login → **E-mail/senha** ativado.
+## Features
 
-### 2. Conta e senha compartilhadas ✅ (já feito)
+**🥫 Pantry (Estoque)**
 
-- Authentication → Usuários → **Adicionar usuário** com um e-mail e a senha que vocês dois vão usar.
-- O e-mail dessa conta fica em `src/config.js` (`EMAIL_DA_CONTA`). O app só pede a senha.
-- O UID dessa conta (coluna "UID do usuário") fica em `firestore.rules`. Se um dia trocarem de conta, troquem o UID lá.
+- A grid of cards, one per ingredient, with emoji, name and quantity.
+- `+` and `−` buttons for a quick manual count before planning the week.
+- Staples such as salt, olive oil and garlic can be marked as basic: they appear in recipes but are never counted or added to the shopping list.
 
-Para mudar a senha: Authentication → Usuários → menu ⋮ da conta → **Redefinir senha**.
+**📖 Recipes (Receitas)**
 
-### 3. Ativar o Hosting
+- Ingredients are structured references to the ingredient catalog, never free text.
+- On a recipe, each ingredient chip is green when the current stock covers it and red when it does not.
+- "Dá pra fazer agora" ("can make it now") ranks recipes by how many ingredients are still missing.
+- Recipes are created and edited by tapping ingredient chips and adjusting quantities, with no typing of ingredient lists.
+- Bulk import: paste a JSON list of recipes and it is validated against the catalog. One button copies the format and our ingredient ids, ready to ask an AI chat for new recipes.
 
-No console do Firebase: **Hosting** (menu Criação/Build) → **Vamos começar**. Pode pular todos os passos de instalação clicando em "Próximo" até o fim. Isso só cria o site `tuna-matata.web.app`.
+**📅 Week (Semana)**
 
-### 4. Chave para o GitHub publicar (secret)
+- Monday to Friday, lunch and dinner: ten slots. Each one takes a recipe, "leftovers", "eating out" or stays empty.
+- The recipe picker lists what can be cooked right now first.
+- **Finalize** goes through the meals in chronological order, takes what is available out of the pantry and puts whatever is missing on the shopping list, summed per ingredient.
+- **Reopen** returns exactly what that finalization took and deletes the list, so the week can be edited and finalized again without deducting twice.
+- Earlier weeks can still be browsed.
 
-O GitHub Actions precisa de uma "conta de serviço" para publicar no Firebase.
+**🛒 Shopping (Compras)**
 
-1. Abra o [Google Cloud Console → Contas de serviço](https://console.cloud.google.com/iam-admin/serviceaccounts?project=tuna-matata) (é o mesmo projeto `tuna-matata`).
-2. **Criar conta de serviço** → nome `github-deploy` → **Criar e continuar**.
-3. Em "Papel", adicione estes três (use "Adicionar outro papel"):
-   - **Administrador do Firebase** (Firebase Admin)
-   - **Consumidor do Service Usage** (Service Usage Consumer)
-   - **Usuário do Cloud Datastore** (Cloud Datastore User), para o seed
-4. **Concluir**. Clique na conta criada → aba **Chaves** → **Adicionar chave** → **Criar nova chave** → **JSON**. Um arquivo `.json` é baixado.
-5. No GitHub: repositório → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**.
-   - Name: `FIREBASE_SERVICE_ACCOUNT`
-   - Secret: cole **o conteúdo inteiro** do arquivo `.json`.
-6. Apague o arquivo `.json` do computador (ou guarde num lugar seguro). **Nunca** coloque esse arquivo no repositório.
+- The list from the most recently finalized week, with checkboxes to tick at the shop.
+- The list is emailed to two addresses when the week is finalized. It can be resent, or copied as plain text.
 
-### 5. Publicar
+**⚙️ Settings (Ajustes)**
 
-- Todo push (ou merge de PR) na `main` publica o site e as regras do Firestore automaticamente (aba **Actions** do GitHub, workflow "Publicar").
-- Cada Pull Request ganha um **link de prévia** num comentário do PR, para testar no iPhone antes do merge. A prévia expira em 7 dias e usa o mesmo banco de dados de verdade.
-- Para publicar de novo sem mudar nada: Actions → "Publicar" → **Run workflow**.
+- Ingredient catalog, recipient emails and a JSON backup export.
 
-### 6. Adicionar à Tela de Início do iPhone
+**Across the app**
 
-1. Abra **https://tuna-matata.web.app** no **Safari**.
-2. Digite a senha uma vez.
-3. Toque em **Compartilhar** (quadrado com a seta) → **Adicionar à Tela de Início** → **Adicionar**.
+- Installable PWA: opens full screen from the Home Screen, with automatic dark mode.
+- Live sync between phones. Browsing and ticking items keep working offline; finalizing a week needs a connection.
+- One shared password, typed once per phone.
 
-O peixinho aparece na Tela de Início como "Tuna Matata" e abre em tela cheia, sem barra do Safari. A senha não é pedida de novo.
+## How it's built
 
-### 7. Carregar os dados iniciais (seed)
+| Piece | Choice |
+|---|---|
+| Frontend | Svelte 5 (runes) + Vite, plain JavaScript |
+| Styling | Hand-written CSS with custom properties, light/dark through `prefers-color-scheme`, no UI library |
+| PWA | `vite-plugin-pwa` (manifest, icons, auto-updating service worker) |
+| Data and auth | Firebase JS SDK: Auth (email/password) and Firestore with a persistent local cache |
+| Navigation | Four bottom tabs plus inner screens, hash routing written by hand |
+| Email | EmailJS REST API, called straight from the browser with `fetch` |
+| Tests | Vitest for the business logic; the Firestore emulator for the security rules and the finalize/reopen transactions |
+| Hosting and CI | Firebase Hosting on the free Spark plan, deployed by GitHub Actions |
 
-Os ingredientes e receitas iniciais ficam em [`seed/seed.json`](seed/seed.json). O arquivo atual é só um exemplo: troquem pela lista de vocês.
+There is no backend of our own: no server, no Cloud Functions, no paid API. The app is a static site that talks to Firestore, and everything that must not go wrong is enforced by Firestore transactions and security rules.
 
-1. No GitHub, abram `seed/seed.json`, toquem no lápis ✏️, editem e façam **Commit changes** (pode ser direto na `main`).
-2. Vão em **Actions** → **Carregar seed** → **Run workflow** → **Run workflow**.
-3. Em menos de um minuto os ingredientes aparecem no app.
+- **Stock changes are atomic.** `+` and `−` use Firestore's `increment(±1)`, so taps from both phones at the same moment both count. The security rules reject any write that would leave stock negative or non-integer.
+- **Finalize and reopen are transactions** that check the week's status first, so neither can be applied twice even if we both tap at once. The deduction itself is a pure function (`planejar()` in [`src/lib/semana.js`](src/lib/semana.js)) covered by unit tests.
+- **A finalized week records exactly what it took** from the pantry, and reopening adds that back instead of overwriting, so manual adjustments made in between survive.
+- **The shopping list lives inside the week document** as a map keyed by ingredient. Ticking a checkbox updates a single field, so two phones never overwrite each other.
+- **Access is a single shared Firebase Auth account.** The app only asks for the password, and the rules allow reads and writes for that account's UID alone.
+- **Email goes out after the transaction commits.** A failed email never undoes a finalized week; it can be resent from the Shopping tab.
 
-Cada ingrediente tem esta forma:
+Svelte was chosen because it needs the least code for the same result: a component is close to plain HTML with a little JavaScript, reactivity is built in and the bundle stays small, which keeps the PWA quick on the phone.
 
-```json
-{ "id": "cebola-roxa", "nome": "Cebola roxa", "emoji": "🧅", "unidade": "unidade", "estoque": 6 }
+### Data model (Firestore)
+
+| Path | Document |
+|---|---|
+| `ingredientes/{slug}` | `{ nome, emoji, unidade, basico, estoque }` |
+| `receitas/{slug}` | `{ nome, emoji, tempoMin, ingredientes: [{ ingredienteId, quantidade }] }` |
+| `semanas/{Monday, YYYY-MM-DD}` | `{ status, refeicoes, finalizadaEm, descontado, detalhe, compras, emailEnviadoEm }` |
+| `config/planejamento` | `{ ultimaFinalizada }`, the only week that can be reopened |
+| `config/app` | `{ emails }`, who receives the shopping list |
+
+All quantities are integers ≥ 0.
+
+### Project structure
+
+```
+src/
+  config.js          Firebase web config, shared account email, EmailJS public keys
+  App.svelte         session handling and hash routes
+  telas/             one screen per tab, plus login, settings, ingredient and recipe screens
+  componentes/       reusable pieces (tab bar, chips, meal picker...)
+  lib/               business logic as pure functions, with *.test.js next to them
+    semana.js          week dates, slots and planejar() (deduction and shopping list)
+    planejamento.js    transactions: pick a meal, finalize, reopen
+    receitas.js        stock coverage ("can make it now") and import validation
+    compras.js         shopping list, email text and backup
+    email.js           EmailJS call
+    dados.svelte.js    shared state kept live with onSnapshot
+  estilo.css         colour variables and shared classes
+testes/              emulator tests: security rules, finalize/reopen
+firestore.rules      only the shared account reads and writes; stock is an integer ≥ 0
+seed/seed.json       starter ingredients and recipes
+scripts/seed.mjs     loads the seed with firebase-admin
+.github/workflows/   deploy (main), preview (pull requests), seed (manual)
+docs/                specification, architecture and setup guide
 ```
 
-- `id`: minúsculo, sem acento, com hífens. É o que as receitas usam, então não mudem depois.
-- `estoque`: só vale para ingrediente **novo**. Se o ingrediente já existe no app, o seed atualiza nome, emoji, unidade e básico, mas **nunca** mexe no estoque.
-- `"basico": true` para sal, azeite, alho e outros da despensa (sem estoque, fora da lista de compras).
-- Rodar o seed de novo é seguro: nada é apagado e nada é duplicado.
+### How it was made
 
-Cada receita lista os ingredientes pelo `id`, com quantidade inteira:
+The project started from a written specification, followed by an architecture proposal, and was then built in five stages: project, deploy and access; ingredients and pantry; recipes and import; weekly planning; shopping list, email and backup. Each stage was a pull request, tested on the phone through its preview link before merging.
 
-```json
-{ "id": "massa-com-atum", "nome": "Massa com atum", "emoji": "🍝", "tempoMin": 20,
-  "ingredientes": [ { "ingredienteId": "atum", "quantidade": 1 }, { "ingredienteId": "massa", "quantidade": 1 } ] }
-```
-
-Receita que já existe no app é pulada (o seed não desfaz edições feitas no app). Se alguma receita usar um `ingredienteId` que não existe, o seed para e avisa qual.
-
-Pelo app também dá para:
-- adicionar e editar ingredientes: ⚙️ → **Ingredientes**;
-- criar e editar receitas: aba **Receitas** → **＋ Nova**;
-- importar várias receitas de uma vez: aba **Receitas** → **📥 Importar** → colar o JSON. O botão "Copiar instruções para outro chat de IA" copia um texto com o formato e a lista dos nossos ingredientes, para pedir receitas prontas em outro chat.
-
-### 8. Configurar o e-mail (EmailJS)
-
-Ao finalizar a semana, o app manda a lista de compras por e-mail pelo [EmailJS](https://www.emailjs.com/) (plano grátis: 200 e-mails por mês, sobra muito). Enquanto isso não estiver configurado, o app avisa e o resto funciona normalmente.
-
-1. Criem uma conta em **emailjs.com** (botão "Sign Up Free").
-2. **Email Services** → **Add New Service** → **Gmail** → **Connect Account** (entrem com o Gmail que vai *enviar* os e-mails) → **Create Service**. Anotem o **Service ID** (algo como `service_abc1234`).
-3. **Email Templates** → **Create New Template** e preencham:
-   - **Subject:** `{{assunto}}`
-   - **Content:** apaguem o texto de exemplo e deixem só `{{{mensagem_html}}}` (com **três** chaves de cada lado, para as linhas não ficarem grudadas). Se o editor tiver um botão de código (`< >`), colem lá.
-   - **To Email** (na lateral): `{{para}}`
-   - Salvem (**Save**). Anotem o **Template ID** (fica em **Settings** do modelo, algo como `template_abc1234`).
-4. **Account** → **General**: anotem a **Public Key**.
-5. No GitHub, abram [`src/config.js`](src/config.js), toquem no lápis ✏️ e preencham as três chaves no `EMAILJS`. Façam **Commit changes** na `main` (o site é publicado sozinho). Essas chaves são públicas, podem ficar no código. (Ou mandem as três para o Claude no chat do projeto, que ele coloca.)
-
-   ```js
-   export const EMAILJS = {
-     servico: 'service_abc1234',
-     modelo: 'template_abc1234',
-     chavePublica: 'AbCdEfGh123456',
-   };
-   ```
-6. No app: ⚙️ → **E-mails da lista de compras** → coloquem os dois e-mails que vão *receber* a lista → **Salvar e-mails**.
-7. Testem na aba **Compras** → **📧 Enviar e-mail** (precisa de uma semana finalizada).
-
-Opcional, para ninguém usar a chave de vocês em outro site: se em **Account** → **Security** houver a opção de limitar os domínios, coloquem `tuna-matata.web.app`. Com isso, o e-mail só sai do app publicado (as prévias dos PRs deixam de enviar).
-
-Se um e-mail falhar, a semana continua finalizada: é só tocar em **📧 Reenviar e-mail** na aba Compras.
-
-### 9. Backup
-
-O plano grátis do Firebase não faz backup sozinho. De vez em quando: ⚙️ → **💾 Exportar backup**. No iPhone abre o menu de compartilhar: escolham **Salvar em Arquivos** (ou mandem para vocês mesmos).
-
-O arquivo `tuna-matata-backup-AAAA-MM-DD.json` tem ingredientes (com estoque), receitas, todas as semanas e os ajustes. As partes `ingredientes` e `receitas` estão no mesmo formato do `seed/seed.json`, então dá para recriar tudo num projeto novo colando essas duas listas no seed.
-
----
-
-## Para quem vai mexer no código
+## Running it locally
 
 ```bash
 npm install
-npm run dev      # abre em http://localhost:5173
-npm test         # testes da lógica
-npm run test:regras   # testa as regras e o finalizar/reabrir no emulador (precisa de Java)
-npm run build    # gera a pasta dist/
+npm run dev           # http://localhost:5173
+npm test              # unit tests (Vitest)
+npm run test:regras   # security rules and finalize/reopen on the Firestore emulator (needs Java)
+npm run build         # outputs dist/
 ```
 
-Stack: Svelte 5 + Vite, Firebase (Auth + Firestore), PWA. Mais detalhes em [`CLAUDE.md`](CLAUDE.md).
+`npm run dev` talks to the real Firebase project configured in [`src/config.js`](src/config.js). To try the whole app without touching real data, run it against the emulators:
+
+1. Start them: `npx firebase-tools@15 emulators:start --only auth,firestore --project tuna-matata`
+2. In the Auth emulator, create a user with the UID from `firestore.rules` and the email from `src/config.js`.
+3. Load the seed: `FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 node scripts/seed.mjs`
+4. Start the app: `VITE_EMULADOR=1 npm run dev`
+
+## Deployment
+
+- Every push to `main` runs the tests, builds, and deploys the site and the Firestore rules to Firebase Hosting.
+- Every pull request gets a preview link posted as a comment. It expires after 7 days and uses the real database.
+- The seed is loaded by a manual workflow (Actions → "Carregar seed").
+
+Setting up a copy from scratch (Firebase project, shared account, GitHub secret, EmailJS, Home Screen install) is described step by step in [`docs/configuracao.md`](docs/configuracao.md).
+
+## Documentation
+
+All in Portuguese:
+
+- [`docs/especificacao.md`](docs/especificacao.md): the original specification
+- [`docs/arquitetura.md`](docs/arquitetura.md): architecture, data model and the finalize/reopen logic in detail
+- [`docs/configuracao.md`](docs/configuracao.md): first-time setup, step by step
