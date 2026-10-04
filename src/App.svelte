@@ -31,7 +31,7 @@
     estoque: { tela: Estoque, titulo: 'Estoque' },
     receitas: { tela: Receitas, titulo: 'Receitas' },
     semana: { tela: Semana, titulo: 'Semana', esperaDados: true },
-    compras: { tela: Compras, titulo: 'Compras' },
+    compras: { tela: Compras, titulo: 'Compras', esperaDados: true },
     ajustes: { tela: Ajustes, titulo: 'Ajustes', voltar: '#/estoque' },
     ingredientes: { tela: Ingredientes, titulo: 'Ingredientes', voltar: '#/ajustes' },
     ingrediente: { tela: Ingrediente, titulo: 'Ingrediente', voltar: '#/ingredientes', esperaDados: true },

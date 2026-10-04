@@ -20,7 +20,7 @@ Svelte 5 (runes: `$state`, `$derived`, `$props`) + Vite, JavaScript puro, CSS pr
 
 ```
 src/
-  config.js            config web do Firebase e e-mail da conta compartilhada
+  config.js            config web do Firebase, e-mail da conta compartilhada e chaves públicas do EmailJS
   lib/firebase.js      app, auth e db (cache offline; VITE_EMULADOR=1 usa os emuladores)
   lib/dados.svelte.js  estado compartilhado sincronizado ao vivo (onSnapshot)
   lib/aviso.svelte.js  aviso rápido (toast)
@@ -29,6 +29,8 @@ src/
   lib/receitas.js      cobertura pelo estoque ("Dá pra fazer agora") e validação de importação
   lib/semana.js        datas da semana, slots e planejar() (desconto e compras, função pura)
   lib/planejamento.js  transações: escolher refeição, finalizar e reabrir
+  lib/compras.js       lista de compras, texto do e-mail e backup (funções puras)
+  lib/email.js         envio pelo EmailJS (fetch na API REST, sem biblioteca)
   telas/               uma tela por aba + Login, Ajustes, Ingrediente(s), Receita, ReceitaEditar, Importar
   componentes/         peças reutilizáveis (Abas, Vazio, EscolherRefeicao...)
   estilo.css           variáveis de cor, .card, .botao, .chip
@@ -53,7 +55,7 @@ Uma conta única no Firebase Auth (e-mail/senha). O e-mail fica em `src/config.j
 - `receitas/{slug}`: `{ nome, emoji, tempoMin, ingredientes: [{ ingredienteId, quantidade }] }`. Nunca texto livre.
 - `semanas/{AAAA-MM-DD da segunda}`: `{ status: 'rascunho'|'finalizada', refeicoes: { 'seg-almoco': {tipo:'receita', receitaId} | {tipo:'sobras'} | {tipo:'fora'} | null, ... }, finalizadaEm, descontado: {ingId: qtd}, detalhe: [...], compras: {ingId: {quantidade, comprado}}, emailEnviadoEm }`.
 - `config/planejamento`: `{ ultimaFinalizada: 'AAAA-MM-DD' | null }`, a única semana que pode ser reaberta.
-- `config/app`: `{ emails: [a, b] }`.
+- `config/app`: `{ emails: [a, b] }`, editável em Ajustes.
 
 Detalhes e exemplos em `docs/arquitetura.md`.
 
@@ -63,7 +65,9 @@ Detalhes e exemplos em `docs/arquitetura.md`.
 - **Finalizar** (transação): exige `status == 'rascunho'`. Percorre seg-almoço, seg-janta, ter-almoço ... sex-janta; pula vazio/sobras/fora; para cada ingrediente não básico `usa = min(estoque, qtd)`, desconta, e `qtd - usa` soma em `compras`. Grava estoque, `descontado`, `detalhe`, `compras`, `status: 'finalizada'` e `config/planejamento.ultimaFinalizada`. Depois envia o e-mail (falha no e-mail não desfaz nada).
 - **Reabrir** (transação): só a semana finalizada mais recente (`ultimaFinalizada`); exige `status == 'finalizada'`; devolve `descontado` com soma (não sobrescreve ajustes manuais); apaga `descontado`, `detalhe`, `compras`, `emailEnviadoEm`; volta a `rascunho` e zera `ultimaFinalizada`.
 - **Escolher refeição** (transação): recusada se a semana estiver finalizada.
-- **Lista de compras:** checkbox é só visual, não mexe no estoque.
+- **Lista de compras:** a aba Compras mostra a semana finalizada mais recente. Checkbox (`compras.<id>.comprado`) é só visual, não mexe no estoque.
+- **E-mail:** sai pelo EmailJS logo depois da transação de finalizar, para os `emails` de `config/app`, e grava `emailEnviadoEm`. Falha ou falta de configuração só gera um aviso; "Reenviar e-mail" fica na aba Compras. O modelo do EmailJS usa `{{para}}`, `{{assunto}}` e `{{{mensagem_html}}}` (README, passo 8).
+- **Backup:** Ajustes exporta um JSON com todas as coleções; `ingredientes` e `receitas` ficam no formato do seed.
 - **Semana padrão:** sábado/domingo abrem a próxima semana; segunda a sexta, a atual.
 - **Dá pra fazer agora:** receitas ordenadas por quantos itens faltam (0 primeiro), depois unidades faltando, depois nome. Básicos sempre contam como cobertos; ingrediente fora do catálogo conta como faltando.
 - **Importar receitas:** valida que todo `ingredienteId` existe (receita com id inexistente não entra e o id é listado); id repetido é pulado e avisado; `id` ausente vem do nome.

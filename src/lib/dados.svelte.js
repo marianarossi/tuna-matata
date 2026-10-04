@@ -8,6 +8,7 @@ export const dados = $state({
   receitas: [], // ordenadas por nome
   semanas: {}, // id (segunda-feira) -> semana
   ultimaFinalizada: null, // a única semana que pode ser reaberta
+  emails: [], // para onde vai a lista de compras (config/app)
   carregado: false, // ingredientes
   receitasCarregadas: false,
   semanasCarregadas: false,
@@ -59,8 +60,17 @@ export function comecarSincronizar() {
     ),
     onSnapshot(
       doc(db, 'config', 'planejamento'),
-      (snap) => (dados.ultimaFinalizada = snap.data()?.ultimaFinalizada ?? null),
+      (snap) => {
+        dados.ultimaFinalizada = snap.data()?.ultimaFinalizada ?? null;
+      },
       (erro) => console.error('planejamento', erro),
+    ),
+    onSnapshot(
+      doc(db, 'config', 'app'),
+      (snap) => {
+        dados.emails = snap.data()?.emails ?? [];
+      },
+      (erro) => console.error('config', erro),
     ),
   );
 }
@@ -72,6 +82,7 @@ export function pararSincronizar() {
   dados.receitas = [];
   dados.semanas = {};
   dados.ultimaFinalizada = null;
+  dados.emails = [];
   dados.carregado = false;
   dados.receitasCarregadas = false;
   dados.semanasCarregadas = false;
