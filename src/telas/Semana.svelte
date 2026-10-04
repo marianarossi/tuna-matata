@@ -1,8 +1,9 @@
 <script>
   import { db } from '../lib/firebase.js';
-  import { dados, receitaPorId, ingredientePorId } from '../lib/dados.svelte.js';
+  import { dados, receitaPorId, ingredientePorId, mapaDeIngredientes } from '../lib/dados.svelte.js';
   import { DIAS, REFEICOES, segundaPadrao, somarSemanas, dataCurta, nomeDoSlot, paraId } from '../lib/semana.js';
   import { escolherRefeicao, finalizarSemana, reabrirSemana, ErroPlanejamento } from '../lib/planejamento.js';
+  import { enviarLista, ErroEmail } from '../lib/email.js';
   import { avisar } from '../lib/aviso.svelte.js';
   import EscolherRefeicao from '../componentes/EscolherRefeicao.svelte';
   import ChipIngrediente from '../componentes/ChipIngrediente.svelte';
@@ -44,14 +45,25 @@
   async function finalizar() {
     if (!confirm('Finalizar a semana? O estoque vai ser descontado e a lista de compras, gerada.')) return;
     ocupado = true;
+    let resultado;
     try {
-      await finalizarSemana(db, semanaId);
-      avisar('✅ Semana finalizada!');
+      resultado = await finalizarSemana(db, semanaId);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (e) {
       alert(mensagemDeErro(e));
+      ocupado = false;
+      return;
     }
     ocupado = false;
+    // A finalização já valeu. Se o e-mail falhar, dá para reenviar pela aba Compras.
+    avisar('✅ Semana finalizada! Enviando o e-mail…', 10000);
+    const compras = Object.fromEntries(Object.entries(resultado.compras).map(([id, quantidade]) => [id, { quantidade }]));
+    try {
+      await enviarLista(db, semanaId, compras, mapaDeIngredientes(), dados.emails);
+      avisar('✅ Semana finalizada e lista enviada por e-mail!');
+    } catch (e) {
+      avisar(`✅ Semana finalizada. ${e instanceof ErroEmail ? e.message : 'O e-mail não foi enviado. Dá para reenviar na aba Compras.'}`, 6000);
+    }
   }
 
   async function reabrir() {
@@ -114,6 +126,7 @@
           <ChipIngrediente ingredienteId={ingId} ingrediente={ingredientePorId(ingId)} quantidade={item.quantidade} />
         {/each}
       </div>
+      <a class="ver-lista" href="#/compras">Abrir a lista de compras ›</a>
     {:else}
       <p class="suave">Hakuna matata, não falta nada 🐟</p>
     {/if}
@@ -225,6 +238,13 @@
   .suave {
     margin: 0;
     color: var(--texto-suave);
+  }
+  .ver-lista {
+    display: inline-block;
+    margin-top: 10px;
+    font-weight: 600;
+    color: var(--primaria);
+    text-decoration: none;
   }
   .reabrir {
     margin-top: 18px;

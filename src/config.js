@@ -13,3 +13,11 @@ export const firebaseConfig = {
 
 // A conta única do Firebase Auth. O app só pede a senha.
 export const EMAIL_DA_CONTA = 'wmarianarossi@gmail.com';
+
+// EmailJS, para mandar a lista de compras por e-mail (passo 8 do README).
+// As três chaves são públicas por natureza. Vazias = o app avisa que o e-mail não está configurado.
+export const EMAILJS = {
+  servico: '', // Service ID, ex.: service_abc1234
+  modelo: '', // Template ID, ex.: template_abc1234
+  chavePublica: '', // Public Key (Account → General)
+};

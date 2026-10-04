@@ -94,7 +94,37 @@ Pelo app também dá para:
 
 ### 8. Configurar o e-mail (EmailJS)
 
-_Chega na etapa 5._
+Ao finalizar a semana, o app manda a lista de compras por e-mail pelo [EmailJS](https://www.emailjs.com/) (plano grátis: 200 e-mails por mês, sobra muito). Enquanto isso não estiver configurado, o app avisa e o resto funciona normalmente.
+
+1. Criem uma conta em **emailjs.com** (botão "Sign Up Free").
+2. **Email Services** → **Add New Service** → **Gmail** → **Connect Account** (entrem com o Gmail que vai *enviar* os e-mails) → **Create Service**. Anotem o **Service ID** (algo como `service_abc1234`).
+3. **Email Templates** → **Create New Template** e preencham:
+   - **Subject:** `{{assunto}}`
+   - **Content:** apaguem o texto de exemplo e deixem só `{{{mensagem_html}}}` (com **três** chaves de cada lado, para as linhas não ficarem grudadas). Se o editor tiver um botão de código (`< >`), colem lá.
+   - **To Email** (na lateral): `{{para}}`
+   - Salvem (**Save**). Anotem o **Template ID** (fica em **Settings** do modelo, algo como `template_abc1234`).
+4. **Account** → **General**: anotem a **Public Key**.
+5. No GitHub, abram [`src/config.js`](src/config.js), toquem no lápis ✏️ e preencham as três chaves no `EMAILJS`. Façam **Commit changes** na `main` (o site é publicado sozinho). Essas chaves são públicas, podem ficar no código. (Ou mandem as três para o Claude no chat do projeto, que ele coloca.)
+
+   ```js
+   export const EMAILJS = {
+     servico: 'service_abc1234',
+     modelo: 'template_abc1234',
+     chavePublica: 'AbCdEfGh123456',
+   };
+   ```
+6. No app: ⚙️ → **E-mails da lista de compras** → coloquem os dois e-mails que vão *receber* a lista → **Salvar e-mails**.
+7. Testem na aba **Compras** → **📧 Enviar e-mail** (precisa de uma semana finalizada).
+
+Opcional, para ninguém usar a chave de vocês em outro site: se em **Account** → **Security** houver a opção de limitar os domínios, coloquem `tuna-matata.web.app`. Com isso, o e-mail só sai do app publicado (as prévias dos PRs deixam de enviar).
+
+Se um e-mail falhar, a semana continua finalizada: é só tocar em **📧 Reenviar e-mail** na aba Compras.
+
+### 9. Backup
+
+O plano grátis do Firebase não faz backup sozinho. De vez em quando: ⚙️ → **💾 Exportar backup**. No iPhone abre o menu de compartilhar: escolham **Salvar em Arquivos** (ou mandem para vocês mesmos).
+
+O arquivo `tuna-matata-backup-AAAA-MM-DD.json` tem ingredientes (com estoque), receitas, todas as semanas e os ajustes. As partes `ingredientes` e `receitas` estão no mesmo formato do `seed/seed.json`, então dá para recriar tudo num projeto novo colando essas duas listas no seed.
 
 ---
 

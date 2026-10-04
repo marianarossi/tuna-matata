@@ -2,8 +2,8 @@
 export const aviso = $state({ texto: '' });
 
 let timer;
-export function avisar(texto) {
+export function avisar(texto, ms = 3000) {
   aviso.texto = texto;
   clearTimeout(timer);
-  timer = setTimeout(() => (aviso.texto = ''), 3000);
+  timer = setTimeout(() => (aviso.texto = ''), ms);
 }

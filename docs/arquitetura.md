@@ -86,6 +86,10 @@ Finalizar grava aqui a semana (se for mais nova que a anterior); reabrir volta p
 ```
 As chaves públicas do EmailJS e a config web do Firebase ficam em `src/config.js` (são públicas por natureza).
 
+### E-mail e backup
+- Depois de finalizar, o navegador chama a API REST do EmailJS (`POST https://api.emailjs.com/api/v1.0/email/send`) com `para` (os dois e-mails separados por vírgula), `assunto`, `mensagem` (texto simples) e `mensagem_html` (o mesmo texto com `<br>`). Deu certo: grava `emailEnviadoEm` na semana. O mesmo texto é o que "Copiar lista" copia.
+- O backup usa os dados já sincronizados ao vivo (ingredientes, receitas, semanas e config), converte datas para texto ISO e baixa um JSON. No iPhone abre o menu de compartilhar, que só aceita ser aberto logo depois do toque, por isso não espera a rede. `ingredientes` e `receitas` ficam no formato do `seed/seed.json`.
+
 ### Regras de segurança
 ```
 match /{documento=**} {
