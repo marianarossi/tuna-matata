@@ -103,7 +103,7 @@
   <input type="email" bind:value={emails[0]} placeholder="primeiro@email.com" aria-label="Primeiro e-mail" autocomplete="off" />
   <input type="email" bind:value={emails[1]} placeholder="segundo@email.com" aria-label="Segundo e-mail" autocomplete="off" />
   {#if !emailConfigurado()}
-    <p class="aviso-email">⚠️ O envio ainda não foi configurado no EmailJS (passo 8 do README).</p>
+    <p class="aviso-email">⚠️ O envio ainda não foi configurado no EmailJS (passo 8 de docs/configuracao.md).</p>
   {/if}
   <button class="botao primario largo" onclick={salvarEmails} disabled={salvando || !mudou}>Salvar e-mails</button>
 </section>

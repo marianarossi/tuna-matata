@@ -4,6 +4,9 @@ PWA pessoal de dois irmãos (iPhone, Tela de Início) para estoque, receitas, ca
 
 - Especificação completa (fonte da verdade): `docs/especificacao.md`
 - Arquitetura e decisões aprovadas: `docs/arquitetura.md`
+- Passo a passo de configuração (Firebase, GitHub, seed, EmailJS, backup): `docs/configuracao.md`
+
+O `README.md` é em inglês e no formato padrão (o que o app faz e como foi feito), sem passo a passo. Isso substitui o item "README em português" da especificação. O resto da documentação continua em português.
 
 ## Restrições que nunca mudam
 
@@ -40,7 +43,7 @@ testes/                testes no emulador: regras e finalizar/reabrir (npm run t
 seed/seed.json         dados iniciais (ingredientes e receitas)
 scripts/seed.mjs       carrega o seed com firebase-admin
 .github/workflows/     deploy.yml (main), preview.yml (PRs), seed.yml (manual)
-docs/                  especificação e arquitetura
+docs/                  especificação, arquitetura e configuração
 ```
 
 Nomes de arquivos, variáveis e funções em português, como o resto do código.
@@ -66,7 +69,7 @@ Detalhes e exemplos em `docs/arquitetura.md`.
 - **Reabrir** (transação): só a semana finalizada mais recente (`ultimaFinalizada`); exige `status == 'finalizada'`; devolve `descontado` com soma (não sobrescreve ajustes manuais); apaga `descontado`, `detalhe`, `compras`, `emailEnviadoEm`; volta a `rascunho` e zera `ultimaFinalizada`.
 - **Escolher refeição** (transação): recusada se a semana estiver finalizada.
 - **Lista de compras:** a aba Compras mostra a semana finalizada mais recente. Checkbox (`compras.<id>.comprado`) é só visual, não mexe no estoque.
-- **E-mail:** sai pelo EmailJS logo depois da transação de finalizar, para os `emails` de `config/app`, e grava `emailEnviadoEm`. Falha ou falta de configuração só gera um aviso; "Reenviar e-mail" fica na aba Compras. O modelo do EmailJS usa `{{para}}`, `{{assunto}}` e `{{{mensagem_html}}}` (README, passo 8).
+- **E-mail:** sai pelo EmailJS logo depois da transação de finalizar, para os `emails` de `config/app`, e grava `emailEnviadoEm`. Falha ou falta de configuração só gera um aviso; "Reenviar e-mail" fica na aba Compras. O modelo do EmailJS usa `{{para}}`, `{{{assunto}}}` e `{{{mensagem_html}}}` (`docs/configuracao.md`, passo 8); com duas chaves o EmailJS escapa HTML e a `/` da data vira `&#x2F;`.
 - **Backup:** Ajustes exporta um JSON com todas as coleções; `ingredientes` e `receitas` ficam no formato do seed.
 - **Semana padrão:** sábado/domingo abrem a próxima semana; segunda a sexta, a atual.
 - **Dá pra fazer agora:** receitas ordenadas por quantos itens faltam (0 primeiro), depois unidades faltando, depois nome. Básicos sempre contam como cobertos; ingrediente fora do catálogo conta como faltando.

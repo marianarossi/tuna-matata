@@ -11,10 +11,11 @@ export const emailConfigurado = () => Boolean(EMAILJS.servico && EMAILJS.modelo 
 /**
  * Manda a lista da semana para os e-mails dos Ajustes e marca emailEnviadoEm.
  * compras = { ingredienteId: { quantidade } }, como fica gravado na semana.
- * O modelo no EmailJS usa {{para}}, {{assunto}} e {{{mensagem_html}}} (README, passo 8).
+ * O modelo no EmailJS usa {{para}}, {{{assunto}}} e {{{mensagem_html}}} (docs/configuracao.md, passo 8).
+ * Três chaves no assunto: com duas, o EmailJS escapa HTML e a "/" da data chega como "&#x2F;".
  */
 export async function enviarLista(db, semanaId, compras, porId, emails) {
-  if (!emailConfigurado()) throw new ErroEmail('O e-mail ainda não foi configurado (passo 8 do README).');
+  if (!emailConfigurado()) throw new ErroEmail('O e-mail ainda não foi configurado (passo 8 de docs/configuracao.md).');
   if (!emails?.length) throw new ErroEmail('Coloquem os e-mails em ⚙️ Ajustes.');
 
   const mensagem = textoDaLista(semanaId, itensDaLista(compras, porId));
