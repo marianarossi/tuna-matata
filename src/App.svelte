@@ -13,6 +13,9 @@
   import Ajustes from './telas/Ajustes.svelte';
   import Ingredientes from './telas/Ingredientes.svelte';
   import Ingrediente from './telas/Ingrediente.svelte';
+  import Receita from './telas/Receita.svelte';
+  import ReceitaEditar from './telas/ReceitaEditar.svelte';
+  import Importar from './telas/Importar.svelte';
 
   // undefined = ainda verificando, null = sem sessão
   let usuario = $state(undefined);
@@ -23,7 +26,7 @@
   });
 
   // Rotas simples pelo hash: #/estoque, #/ajustes, #/ingrediente/cebola-roxa ...
-  // voltar = para onde o ✕/‹ do topo leva (telas internas).
+  // voltar = para onde o ✕ do topo leva (telas internas); aba = qual aba fica acesa.
   const telas = {
     estoque: { tela: Estoque, titulo: 'Estoque' },
     receitas: { tela: Receitas, titulo: 'Receitas' },
@@ -32,6 +35,15 @@
     ajustes: { tela: Ajustes, titulo: 'Ajustes', voltar: '#/estoque' },
     ingredientes: { tela: Ingredientes, titulo: 'Ingredientes', voltar: '#/ajustes' },
     ingrediente: { tela: Ingrediente, titulo: 'Ingrediente', voltar: '#/ingredientes', esperaDados: true },
+    receita: { tela: Receita, titulo: 'Receita', voltar: '#/receitas', aba: 'receitas', esperaDados: true },
+    'editar-receita': {
+      tela: ReceitaEditar,
+      titulo: (id) => (id === 'nova' ? 'Nova receita' : 'Editar receita'),
+      voltar: (id) => (id === 'nova' ? '#/receitas' : `#/receita/${id}`),
+      aba: 'receitas',
+      esperaDados: true,
+    },
+    importar: { tela: Importar, titulo: 'Importar', voltar: '#/receitas', aba: 'receitas', esperaDados: true },
   };
 
   function lerRota() {
@@ -45,6 +57,9 @@
   });
 
   const atual = $derived(telas[rota.nome]);
+  const valor = (v) => (typeof v === 'function' ? v(rota.parametro) : v);
+  const voltar = $derived(valor(atual.voltar));
+  const titulo = $derived(valor(atual.titulo));
 </script>
 
 {#if usuario === undefined}
@@ -53,15 +68,15 @@
   <Login />
 {:else}
   <header class="topo">
-    <h1>{atual.titulo}</h1>
-    {#if atual.voltar}
-      <a class="botao-icone" href={atual.voltar} aria-label="Voltar">✕</a>
+    <h1>{titulo}</h1>
+    {#if voltar}
+      <a class="botao-icone" href={voltar} aria-label="Voltar">✕</a>
     {:else}
       <a class="botao-icone" href="#/ajustes" aria-label="Ajustes">⚙️</a>
     {/if}
   </header>
   <main class="conteudo">
-    {#if atual.esperaDados && !dados.carregado}
+    {#if atual.esperaDados && !(dados.carregado && dados.receitasCarregadas)}
       <Vazio emoji="🐟" titulo="Carregando…" />
     {:else}
       {#key rota.nome + '/' + rota.parametro}
@@ -70,7 +85,7 @@
     {/if}
   </main>
   <Aviso />
-  <Abas rota={rota.nome} />
+  <Abas rota={atual.aba ?? rota.nome} />
 {/if}
 
 <style>

@@ -20,5 +20,72 @@
     { "id": "alho", "nome": "Alho", "emoji": "🧄", "unidade": "cabeça", "basico": true },
     { "id": "oleo", "nome": "Óleo", "emoji": "🌻", "unidade": "garrafa", "basico": true },
     { "id": "pimenta", "nome": "Pimenta-do-reino", "emoji": "🌶️", "unidade": "pote", "basico": true }
+  ],
+  "receitas": [
+    {
+      "id": "massa-com-atum",
+      "nome": "Massa com atum",
+      "emoji": "🍝",
+      "tempoMin": 20,
+      "ingredientes": [
+        { "ingredienteId": "atum", "quantidade": 1 },
+        { "ingredienteId": "pimentao", "quantidade": 1 },
+        { "ingredienteId": "massa", "quantidade": 1 },
+        { "ingredienteId": "azeite", "quantidade": 1 },
+        { "ingredienteId": "sal", "quantidade": 1 }
+      ]
+    },
+    {
+      "id": "omelete",
+      "nome": "Omelete",
+      "emoji": "🍳",
+      "tempoMin": 10,
+      "ingredientes": [
+        { "ingredienteId": "ovo", "quantidade": 3 },
+        { "ingredienteId": "tomate", "quantidade": 1 },
+        { "ingredienteId": "queijo", "quantidade": 1 },
+        { "ingredienteId": "sal", "quantidade": 1 }
+      ]
+    },
+    {
+      "id": "arroz-com-feijao-e-ovo",
+      "nome": "Arroz, feijão e ovo",
+      "emoji": "🍚",
+      "tempoMin": 30,
+      "ingredientes": [
+        { "ingredienteId": "arroz", "quantidade": 1 },
+        { "ingredienteId": "feijao", "quantidade": 1 },
+        { "ingredienteId": "ovo", "quantidade": 2 },
+        { "ingredienteId": "alho", "quantidade": 1 },
+        { "ingredienteId": "oleo", "quantidade": 1 }
+      ]
+    },
+    {
+      "id": "frango-com-legumes",
+      "nome": "Frango com legumes",
+      "emoji": "🍗",
+      "tempoMin": 40,
+      "ingredientes": [
+        { "ingredienteId": "frango", "quantidade": 1 },
+        { "ingredienteId": "batata", "quantidade": 2 },
+        { "ingredienteId": "cenoura", "quantidade": 2 },
+        { "ingredienteId": "brocolis", "quantidade": 1 },
+        { "ingredienteId": "azeite", "quantidade": 1 }
+      ]
+    },
+    {
+      "id": "curry-de-legumes-com-coco",
+      "nome": "Curry de legumes com coco",
+      "emoji": "🥥",
+      "tempoMin": 35,
+      "ingredientes": [
+        { "ingredienteId": "leite-de-coco", "quantidade": 1 },
+        { "ingredienteId": "batata", "quantidade": 2 },
+        { "ingredienteId": "cebola-roxa", "quantidade": 1 },
+        { "ingredienteId": "tomate", "quantidade": 2 },
+        { "ingredienteId": "milho", "quantidade": 1 },
+        { "ingredienteId": "arroz", "quantidade": 1 }
+      ]
+    }
   ]
 }

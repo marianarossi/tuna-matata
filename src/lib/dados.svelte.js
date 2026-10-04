@@ -5,8 +5,19 @@ import { ordenarPorNome } from './ingredientes.js';
 
 export const dados = $state({
   ingredientes: [], // ordenados por nome
-  carregado: false,
+  receitas: [], // ordenadas por nome
+  carregado: false, // ingredientes
+  receitasCarregadas: false,
 });
+
+/** Mapa id -> ingrediente (para cobertura das receitas). */
+export function mapaDeIngredientes() {
+  return new Map(dados.ingredientes.map((i) => [i.id, i]));
+}
+
+export function receitaPorId(id) {
+  return dados.receitas.find((r) => r.id === id);
+}
 
 /** Mapa id -> ingrediente, para achar rápido. */
 export function ingredientePorId(id) {
@@ -26,6 +37,14 @@ export function comecarSincronizar() {
       },
       (erro) => console.error('ingredientes', erro),
     ),
+    onSnapshot(
+      collection(db, 'receitas'),
+      (snap) => {
+        dados.receitas = ordenarPorNome(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+        dados.receitasCarregadas = true;
+      },
+      (erro) => console.error('receitas', erro),
+    ),
   );
 }
 
@@ -33,5 +52,7 @@ export function pararSincronizar() {
   paradas.forEach((parar) => parar());
   paradas = [];
   dados.ingredientes = [];
+  dados.receitas = [];
   dados.carregado = false;
+  dados.receitasCarregadas = false;
 }

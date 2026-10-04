@@ -61,7 +61,7 @@ O peixinho aparece na Tela de Início como "Tuna Matata" e abre em tela cheia, s
 
 ### 7. Carregar os dados iniciais (seed)
 
-Os ingredientes iniciais ficam em [`seed/seed.json`](seed/seed.json). O arquivo atual é só um exemplo: troquem pela lista de vocês.
+Os ingredientes e receitas iniciais ficam em [`seed/seed.json`](seed/seed.json). O arquivo atual é só um exemplo: troquem pela lista de vocês.
 
 1. No GitHub, abram `seed/seed.json`, toquem no lápis ✏️, editem e façam **Commit changes** (pode ser direto na `main`).
 2. Vão em **Actions** → **Carregar seed** → **Run workflow** → **Run workflow**.
@@ -78,7 +78,19 @@ Cada ingrediente tem esta forma:
 - `"basico": true` para sal, azeite, alho e outros da despensa (sem estoque, fora da lista de compras).
 - Rodar o seed de novo é seguro: nada é apagado e nada é duplicado.
 
-Também dá para adicionar e editar ingredientes pelo app: ⚙️ → **Ingredientes**.
+Cada receita lista os ingredientes pelo `id`, com quantidade inteira:
+
+```json
+{ "id": "massa-com-atum", "nome": "Massa com atum", "emoji": "🍝", "tempoMin": 20,
+  "ingredientes": [ { "ingredienteId": "atum", "quantidade": 1 }, { "ingredienteId": "massa", "quantidade": 1 } ] }
+```
+
+Receita que já existe no app é pulada (o seed não desfaz edições feitas no app). Se alguma receita usar um `ingredienteId` que não existe, o seed para e avisa qual.
+
+Pelo app também dá para:
+- adicionar e editar ingredientes: ⚙️ → **Ingredientes**;
+- criar e editar receitas: aba **Receitas** → **＋ Nova**;
+- importar várias receitas de uma vez: aba **Receitas** → **📥 Importar** → colar o JSON. O botão "Copiar instruções para outro chat de IA" copia um texto com o formato e a lista dos nossos ingredientes, para pedir receitas prontas em outro chat.
 
 ### 8. Configurar o e-mail (EmailJS)
 
