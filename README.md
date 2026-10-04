@@ -104,7 +104,7 @@ _Chega na etapa 5._
 npm install
 npm run dev      # abre em http://localhost:5173
 npm test         # testes da lógica
-npm run test:regras   # testa firestore.rules no emulador (precisa de Java)
+npm run test:regras   # testa as regras e o finalizar/reabrir no emulador (precisa de Java)
 npm run build    # gera a pasta dist/
 ```
 

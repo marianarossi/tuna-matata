@@ -30,7 +30,7 @@
   const telas = {
     estoque: { tela: Estoque, titulo: 'Estoque' },
     receitas: { tela: Receitas, titulo: 'Receitas' },
-    semana: { tela: Semana, titulo: 'Semana' },
+    semana: { tela: Semana, titulo: 'Semana', esperaDados: true },
     compras: { tela: Compras, titulo: 'Compras' },
     ajustes: { tela: Ajustes, titulo: 'Ajustes', voltar: '#/estoque' },
     ingredientes: { tela: Ingredientes, titulo: 'Ingredientes', voltar: '#/ajustes' },
@@ -76,7 +76,7 @@
     {/if}
   </header>
   <main class="conteudo">
-    {#if atual.esperaDados && !(dados.carregado && dados.receitasCarregadas)}
+    {#if atual.esperaDados && !(dados.carregado && dados.receitasCarregadas && dados.semanasCarregadas)}
       <Vazio emoji="🐟" titulo="Carregando…" />
     {:else}
       {#key rota.nome + '/' + rota.parametro}

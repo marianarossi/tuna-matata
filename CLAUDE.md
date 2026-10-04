@@ -25,14 +25,16 @@ src/
   lib/dados.svelte.js  estado compartilhado sincronizado ao vivo (onSnapshot)
   lib/aviso.svelte.js  aviso rápido (toast)
   lib/                 lógica de negócio em funções puras + testes *.test.js
-  App.svelte           sessão e rotas por hash (#/estoque, #/receita/{id}, #/editar-receita/{id|nova}, #/importar ...)
+  App.svelte           sessão e rotas por hash (#/estoque, #/semana/{AAAA-MM-DD}, #/receita/{id}, #/editar-receita/{id|nova}, #/importar ...)
   lib/receitas.js      cobertura pelo estoque ("Dá pra fazer agora") e validação de importação
+  lib/semana.js        datas da semana, slots e planejar() (desconto e compras, função pura)
+  lib/planejamento.js  transações: escolher refeição, finalizar e reabrir
   telas/               uma tela por aba + Login, Ajustes, Ingrediente(s), Receita, ReceitaEditar, Importar
-  componentes/         peças reutilizáveis (Abas, Vazio...)
+  componentes/         peças reutilizáveis (Abas, Vazio, EscolherRefeicao...)
   estilo.css           variáveis de cor, .card, .botao, .chip
 public/                ícones do PWA (icone.svg, PNGs)
 firestore.rules        só o UID da conta compartilhada lê e grava; estoque inteiro ≥ 0
-testes/                testes das regras no emulador (npm run test:regras)
+testes/                testes no emulador: regras e finalizar/reabrir (npm run test:regras)
 seed/seed.json         dados iniciais (ingredientes e receitas)
 scripts/seed.mjs       carrega o seed com firebase-admin
 .github/workflows/     deploy.yml (main), preview.yml (PRs), seed.yml (manual)
@@ -50,6 +52,7 @@ Uma conta única no Firebase Auth (e-mail/senha). O e-mail fica em `src/config.j
 - `ingredientes/{slug}`: `{ nome, emoji, unidade, basico, estoque }`. `basico: true` = despensa (aparece nas receitas, sem estoque, nunca vai para compras).
 - `receitas/{slug}`: `{ nome, emoji, tempoMin, ingredientes: [{ ingredienteId, quantidade }] }`. Nunca texto livre.
 - `semanas/{AAAA-MM-DD da segunda}`: `{ status: 'rascunho'|'finalizada', refeicoes: { 'seg-almoco': {tipo:'receita', receitaId} | {tipo:'sobras'} | {tipo:'fora'} | null, ... }, finalizadaEm, descontado: {ingId: qtd}, detalhe: [...], compras: {ingId: {quantidade, comprado}}, emailEnviadoEm }`.
+- `config/planejamento`: `{ ultimaFinalizada: 'AAAA-MM-DD' | null }`, a única semana que pode ser reaberta.
 - `config/app`: `{ emails: [a, b] }`.
 
 Detalhes e exemplos em `docs/arquitetura.md`.
@@ -57,8 +60,9 @@ Detalhes e exemplos em `docs/arquitetura.md`.
 ## Regras de negócio
 
 - **Estoque + e −:** sempre `increment(±1)` atômico, nunca ler-e-gravar. O − fica desabilitado em 0 e as regras recusam `estoque < 0`.
-- **Finalizar** (transação): exige `status == 'rascunho'`. Percorre seg-almoço, seg-janta, ter-almoço ... sex-janta; pula vazio/sobras/fora; para cada ingrediente não básico `usa = min(estoque, qtd)`, desconta, e `qtd - usa` soma em `compras`. Grava estoque, `descontado`, `detalhe`, `compras` e `status: 'finalizada'`. Depois envia o e-mail (falha no e-mail não desfaz nada).
-- **Reabrir** (transação): só a semana finalizada mais recente; exige `status == 'finalizada'`; devolve `descontado` com soma (não sobrescreve ajustes manuais); apaga `descontado`, `detalhe`, `compras`, `emailEnviadoEm`; volta a `rascunho`.
+- **Finalizar** (transação): exige `status == 'rascunho'`. Percorre seg-almoço, seg-janta, ter-almoço ... sex-janta; pula vazio/sobras/fora; para cada ingrediente não básico `usa = min(estoque, qtd)`, desconta, e `qtd - usa` soma em `compras`. Grava estoque, `descontado`, `detalhe`, `compras`, `status: 'finalizada'` e `config/planejamento.ultimaFinalizada`. Depois envia o e-mail (falha no e-mail não desfaz nada).
+- **Reabrir** (transação): só a semana finalizada mais recente (`ultimaFinalizada`); exige `status == 'finalizada'`; devolve `descontado` com soma (não sobrescreve ajustes manuais); apaga `descontado`, `detalhe`, `compras`, `emailEnviadoEm`; volta a `rascunho` e zera `ultimaFinalizada`.
+- **Escolher refeição** (transação): recusada se a semana estiver finalizada.
 - **Lista de compras:** checkbox é só visual, não mexe no estoque.
 - **Semana padrão:** sábado/domingo abrem a próxima semana; segunda a sexta, a atual.
 - **Dá pra fazer agora:** receitas ordenadas por quantos itens faltam (0 primeiro), depois unidades faltando, depois nome. Básicos sempre contam como cobertos; ingrediente fora do catálogo conta como faltando.

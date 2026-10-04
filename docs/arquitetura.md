@@ -64,13 +64,21 @@ Os botões + e − do estoque usam `increment(1)` / `increment(-1)` do Firestore
   // preenchidos só ao finalizar:
   finalizadaEm: Timestamp,
   descontado: { atum: 1, pimentao: 2 },             // registro exato do que saiu do estoque
-  detalhe: [ { slot: "seg-almoco", receita: "Massa com atum", emoji: "🍝",
+  detalhe: [ { slot: "seg-almoco", receitaId: "massa-com-atum", nome: "Massa com atum", emoji: "🍝",
                descontado: { atum: 1 }, falta: {} }, ... ],   // para o resumo e o histórico
   compras: { atum: { quantidade: 1, comprado: false }, ... }, // a lista de compras
   emailEnviadoEm: Timestamp | null
 }
 ```
 A lista de compras mora dentro da semana finalizada (um mapa por ingrediente), assim marcar um checkbox é uma atualização de um único campo (`compras.atum.comprado`) e os dois celulares não sobrescrevem um ao outro. A aba Compras mostra a semana finalizada mais recente. Semanas antigas ficam como histórico só leitura.
+
+Escolher o que vai num slot também é uma transação: se a semana já estiver finalizada, a mudança é recusada (assim uma edição atrasada no outro celular não desfaz a finalização).
+
+### `config/planejamento`
+```js
+{ ultimaFinalizada: "2026-10-05" | null }   // a semana finalizada mais recente
+```
+Finalizar grava aqui a semana (se for mais nova que a anterior); reabrir volta para `null`. É isso que garante que só a semana finalizada mais recente pode ser reaberta, mesmo com os dois celulares mexendo juntos.
 
 ### `config/app`
 ```js
@@ -98,7 +106,7 @@ O e-mail da conta compartilhada fica em `src/config.js`; a tela mostra só o cam
    - pula slots vazios, "Sobras" e "Comer fora";
    - para cada ingrediente não básico da receita: `usa = min(estoque, qtd)`, `estoque -= usa`, `descontado[id] += usa`, `compras[id] += qtd - usa`.
    - O estoque nunca fica negativo.
-4. Grava o novo estoque de cada ingrediente afetado e a semana com `status: "finalizada"`, `descontado`, `detalhe`, `compras`.
+4. Grava o novo estoque de cada ingrediente afetado, a semana com `status: "finalizada"`, `descontado`, `detalhe`, `compras`, e `config/planejamento.ultimaFinalizada`.
 5. Se um documento lido mudou no meio (ex.: o outro mexeu no estoque), o Firestore repete a transação sozinho com os dados novos.
 
 Depois da transação: mostra o resumo (o que saiu do estoque + lista de compras) e envia o e-mail. Se o e-mail falhar, a finalização continua valendo e o botão "Reenviar e-mail" resolve.
@@ -106,11 +114,11 @@ Depois da transação: mostra o resumo (o que saiu do estoque + lista de compras
 Exemplo da especificação: massa com atum na segunda e na quinta, 1 atum em estoque. Segunda: usa 1, estoque 0. Quinta: usa 0, compras.atum = 1. ✅
 
 ### Reabrir planejamento (uma transação do Firestore)
-1. Lê a semana. Se `status != "finalizada"`, aborta.
+1. Lê a semana e `config/planejamento`. Se `status != "finalizada"` ou se ela não for a `ultimaFinalizada`, aborta.
 2. Para cada item de `descontado`, soma de volta ao estoque (`estoque += qtd`). Soma, não sobrescreve: ajustes manuais feitos depois continuam valendo.
-3. Grava a semana com `status: "rascunho"` e apaga `descontado`, `detalhe`, `compras`, `emailEnviadoEm`. As refeições escolhidas continuam lá para editar.
+3. Grava a semana com `status: "rascunho"` e apaga `descontado`, `detalhe`, `compras`, `emailEnviadoEm`. As refeições escolhidas continuam lá para editar. `ultimaFinalizada` volta para `null`.
 
-A lógica do passo 3 de finalizar é uma função pura (`planejar(refeicoes, receitas, estoque)`) com testes cobrindo o exemplo acima, básicos, slots sem receita e receita repetida.
+A lógica do passo 3 de finalizar é uma função pura (`planejar(refeicoes, receitas, ingredientes)` em `src/lib/semana.js`) com testes cobrindo o exemplo acima, básicos, slots sem receita e receita repetida. As transações ficam em `src/lib/planejamento.js` e são testadas no emulador (`testes/planejamento.test.js`), incluindo duas finalizações e duas reaberturas ao mesmo tempo (só uma passa) e reabrir depois de um ajuste manual no estoque.
 
 ## 4. Fluxo de trabalho no GitHub
 
