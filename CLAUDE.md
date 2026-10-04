@@ -25,14 +25,15 @@ src/
   lib/dados.svelte.js  estado compartilhado sincronizado ao vivo (onSnapshot)
   lib/aviso.svelte.js  aviso rápido (toast)
   lib/                 lógica de negócio em funções puras + testes *.test.js
-  App.svelte           sessão, rotas por hash (#/estoque, #/receitas, #/semana, #/compras, #/ajustes)
-  telas/               uma tela por aba + Login + Ajustes
+  App.svelte           sessão e rotas por hash (#/estoque, #/receita/{id}, #/editar-receita/{id|nova}, #/importar ...)
+  lib/receitas.js      cobertura pelo estoque ("Dá pra fazer agora") e validação de importação
+  telas/               uma tela por aba + Login, Ajustes, Ingrediente(s), Receita, ReceitaEditar, Importar
   componentes/         peças reutilizáveis (Abas, Vazio...)
   estilo.css           variáveis de cor, .card, .botao, .chip
 public/                ícones do PWA (icone.svg, PNGs)
 firestore.rules        só o UID da conta compartilhada lê e grava; estoque inteiro ≥ 0
 testes/                testes das regras no emulador (npm run test:regras)
-seed/seed.json         dados iniciais (ingredientes; receitas na etapa 3)
+seed/seed.json         dados iniciais (ingredientes e receitas)
 scripts/seed.mjs       carrega o seed com firebase-admin
 .github/workflows/     deploy.yml (main), preview.yml (PRs), seed.yml (manual)
 docs/                  especificação e arquitetura
@@ -60,8 +61,10 @@ Detalhes e exemplos em `docs/arquitetura.md`.
 - **Reabrir** (transação): só a semana finalizada mais recente; exige `status == 'finalizada'`; devolve `descontado` com soma (não sobrescreve ajustes manuais); apaga `descontado`, `detalhe`, `compras`, `emailEnviadoEm`; volta a `rascunho`.
 - **Lista de compras:** checkbox é só visual, não mexe no estoque.
 - **Semana padrão:** sábado/domingo abrem a próxima semana; segunda a sexta, a atual.
-- **Importar receitas:** valida que todo `ingredienteId` existe; id repetido é pulado e avisado.
-- **Seed:** atualiza nome/emoji/unidade/básico; nunca sobrescreve `estoque` de ingrediente existente.
+- **Dá pra fazer agora:** receitas ordenadas por quantos itens faltam (0 primeiro), depois unidades faltando, depois nome. Básicos sempre contam como cobertos; ingrediente fora do catálogo conta como faltando.
+- **Importar receitas:** valida que todo `ingredienteId` existe (receita com id inexistente não entra e o id é listado); id repetido é pulado e avisado; `id` ausente vem do nome.
+- **Apagar ingrediente:** bloqueado enquanto estiver em alguma receita.
+- **Seed:** atualiza nome/emoji/unidade/básico; nunca sobrescreve `estoque` de ingrediente existente. Receita existente é pulada.
 
 ## Rodar e publicar
 

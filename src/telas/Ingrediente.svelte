@@ -51,6 +51,11 @@
   }
 
   async function apagar() {
+    const usadoEm = dados.receitas.filter((r) => r.ingredientes.some((i) => i.ingredienteId === id));
+    if (usadoEm.length) {
+      alert(`${original.nome} está em ${usadoEm.length === 1 ? '1 receita' : `${usadoEm.length} receitas`}: ${usadoEm.map((r) => r.nome).join(', ')}. Tire de lá antes de apagar.`);
+      return;
+    }
     if (!confirm(`Apagar ${original.nome}? Isso não dá para desfazer.`)) return;
     await deleteDoc(doc(db, 'ingredientes', id));
     avisar(`${original.emoji} ${original.nome} apagado.`);
